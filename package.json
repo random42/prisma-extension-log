@@ -4,6 +4,10 @@
   "author": "Roberto Sero",
   "license": "MIT",
   "description": "Prisma client extension for logging queries",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/random42/prisma-extension-log.git"
+  },
   "keywords": [
     "prisma",
     "@prisma/client",
