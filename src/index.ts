@@ -1,21 +1,16 @@
-import { Prisma } from '@prisma/client/extension'
+import { Prisma } from '@prisma/client/extension';
 
-type Args = {}
-
-export const existsFn = (_extensionArgs: Args) =>
+export default () =>
   Prisma.defineExtension({
-    name: "prisma-extension-find-or-create",
-    model: {
-      $allModels: {
-        async exists<T, A>(
-          this: T,
-          args: Prisma.Exact<A, Prisma.Args<T, 'findFirst'>>
-        ): Promise<boolean> {
-
-          const ctx = Prisma.getExtensionContext(this)
-          const result = await (ctx as any).findFirst(args)
-          return result !== null
-        },
+    name: 'prisma-extension-log',
+    query: {
+      async $allOperations({ model, operation, args, query }) {
+        const start = performance.now();
+        const result = await query(args);
+        const end = performance.now();
+        const time = end - start;
+        console.log({ model, operation, args, result, time });
+        return result;
       },
     },
-  })
+  });

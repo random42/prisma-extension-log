@@ -1,22 +1,10 @@
-import { PrismaClient } from "@prisma/client";
-import { existsFn } from "../dist"
+import { PrismaClient } from '@prisma/client';
+import extension from '../dist';
 
-const prisma = new PrismaClient().$extends(existsFn({}))
+const prisma = new PrismaClient().$extends(extension());
 
 async function main() {
-  const user = await prisma.user.exists({ where: { id: 1 } })
-
-  const post = await prisma.post.exists({
-    where: {
-      OR: [
-        { title: { contains: 'prisma' } },
-        { content: { contains: 'prisma' } },
-      ],
-      published: true,
-    },
-  })
-
-  console.log({ user, post })
+  const user = await prisma.user.findFirst();
 }
 
-main()
+main();
