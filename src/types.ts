@@ -4,14 +4,14 @@ import { Operation } from '@prisma/client/runtime/library';
 export type LogArg<T> = false | T;
 
 export type PreQueryArgs = {
-  model?: string;
+  model: string;
   operation: string;
-  args: any;
+  args: unknown;
 };
 
 export type Milliseconds = number;
 
-export type PostQueryArgs = PreQueryArgs & {
+export type LogData = PreQueryArgs & {
   /**
    * Milliseconds with some precision, using performance.now()
    */
@@ -20,12 +20,12 @@ export type PostQueryArgs = PreQueryArgs & {
   error?: unknown;
 };
 
-export type ModelOperationArgs<T> = {
+export type Args<T> = {
   log?: LogArg<T>;
 };
 
 export type LogFunction<T> = (
-  args: PostQueryArgs,
+  data: LogData,
   options?: T
 ) => void | Promise<void>;
 
@@ -43,13 +43,13 @@ const REQUIRED_ARGS_OPERATIONS = [
   'createMany',
   'delete',
   'upsert',
+  'aggregate',
 ] as const satisfies ReadonlyArray<Operation>;
 const OPTIONAL_ARGS_OPERATIONS = [
   'findMany',
   'findFirst',
   'findFirstOrThrow',
   'count',
-  'aggregate',
   'deleteMany',
 ] as const satisfies ReadonlyArray<Operation>;
 
@@ -61,18 +61,18 @@ const OPERATIONS = [
 type RequiredArgsOperation = (typeof REQUIRED_ARGS_OPERATIONS)[number];
 type OptionalArgsOperation = (typeof OPTIONAL_ARGS_OPERATIONS)[number];
 
-type RequiredArgsFunction<O extends RequiredArgsOperation> = <T, A>(
+type RequiredArgsFunction<O extends RequiredArgsOperation, X> = <T, A>(
   this: T,
-  args: Prisma.Exact<A, Prisma.Args<T, O> & ModelOperationArgs>
+  args: Prisma.Exact<A, Prisma.Args<T, O> & Args<X>>
 ) => Promise<Prisma.Result<T, A, O>>;
 
-type OptionalArgsFunction<O extends OptionalArgsOperation> = <T, A>(
+type OptionalArgsFunction<O extends OptionalArgsOperation, X> = <T, A>(
   this: T,
-  args?: Prisma.Exact<A, Prisma.Args<T, O> & ModelOperationArgs>
+  args?: Prisma.Exact<A, Prisma.Args<T, O> & Args<X>>
 ) => Promise<Prisma.Result<T, A, O>>;
 
-export type ModelExtension = {
-  [O1 in RequiredArgsOperation]: RequiredArgsFunction<O1>;
+export type ModelExtension<X> = {
+  [O1 in RequiredArgsOperation]: RequiredArgsFunction<O1, X>;
 } & {
-  [O2 in OptionalArgsOperation]: OptionalArgsFunction<O2>;
+  [O2 in OptionalArgsOperation]: OptionalArgsFunction<O2, X>;
 };
