@@ -9,7 +9,7 @@ import {
 
 export { ExtensionConfig, LogData, LogFunction };
 
-export default <T>(config: ExtensionConfig<T>) => {
+export default <T extends Record<string, any>>(config: ExtensionConfig<T>) => {
   const { log } = config;
   return Prisma.defineExtension({
     name: 'prisma-extension-log',

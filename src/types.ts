@@ -29,7 +29,7 @@ export type LogFunction<T> = (
   options?: T
 ) => void | Promise<void>;
 
-export type ExtensionConfig<T> = {
+export type ExtensionConfig<T extends Record<string, any>> = {
   log: LogFunction<T>;
 };
 
