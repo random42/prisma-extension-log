@@ -1,45 +1,70 @@
-# Prisma Client Extension starter repository
+# prisma-extension-log
 
-Use this template to bootstrap creating your Prisma Client extension.
+Log your model queries in a simple and customizable way.
 
-Client extensions provide a powerful way to add functionality to Prisma Client in a type-safe manner. You can use them to create simple and flexible solutions that are not natively supported by Prisma. 
+## Install
 
-
-
-If you would like to learn more, refer to the [Prisma docs](https://www.prisma.io/docs/concepts/components/prisma-client/client-extensions) to learn more information.
-
-## Get started
-
-Click the **Use this template** button and provide details for your Client extension
-
-Install the dependencies:
-
-```
-npm install
+```sh
+npm i prisma-extension-log
 ```
 
-Build the extension:
+## Usage
 
-```
-npm run build
+```typescript
+// custom options type
+type Options = {
+  includeResult?: boolean;
+};
+
+const prisma = new PrismaClient().$extends(
+  extension({
+    log: (data: LogData, options?: Options) => {
+      const includeResult = options?.includeResult ?? false;
+      const logData = { ...data };
+      if (!includeResult) {
+        delete logData.result;
+      }
+      if (logData.error) {
+        console.error(logData);
+      } else {
+        console.log(logData);
+      }
+    },
+  })
+);
+await prisma.user.findFirst();
+await prisma.user.count({
+  log: false, // disable logging
+});
+await prisma.user.findMany({
+  log: {
+    includeResult: true, // use your options with type safety
+  },
+});
 ```
 
-Set up the example app:
+### Log data
 
+```typescript
+type LogData = {
+  /**
+   * @example User
+   */
+  model: string;
+  /**
+   * @example findMany
+   */
+  operation: string;
+  args: unknown;
+  /**
+   * Milliseconds with some precision, using
+   * performance.now()
+   */
+  time: Milliseconds;
+  result?: unknown;
+  error?: unknown;
+}
 ```
-cd example
-npm install
-npx prisma db push
-```
-
-Test the extension in the example app:
-```
-npm run dev
-```
-
-### Evolve the extension
-
-The code for the extension is located in the [`index.ts`](./src/index.ts) file. Feel free to update it before publishing your Client extension to [npm](https://npmjs.com/).
 
 ## Learn more
 
